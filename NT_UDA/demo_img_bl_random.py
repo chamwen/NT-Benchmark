@@ -42,7 +42,7 @@ for s in range(num_domain):
         pred_tar = pred_tar.astype(int)
         acc_all[itr_idx] = accuracy_score(Y_target, pred_tar) * 100
 
-        print('SVM: {:.2f}'.format(acc_all[itr_idx]))
+        print('acc: {:.2f}'.format(acc_all[itr_idx]))
 
 print('\ndone')
 print('All acc: ', np.round(acc_all, 2))
