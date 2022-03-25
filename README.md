@@ -32,7 +32,11 @@ Code files introduction:
 
 **NT_Noise/** -- NT detection experiments under source label noise
 
-Specifically, take NT-UDA for example, the procedure is
+**NT_UDA/data_synth/** -- the synthetic dataset and code to generate it
+
+
+
+Specifically, take NT-UDA for example, the procedure is:
 
 1. Initialize the networks involved in the experiments to ensure fair comparisons by
 
