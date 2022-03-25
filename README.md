@@ -3,9 +3,9 @@
 [![](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![](https://img.shields.io/github/last-commit/chamwen/NT-Benchmark)](https://github.com/chamwen/NT-Benchmark/commits/main)
 
-NT represents that introducing source domain data/knowledge decreases the learning performance in the target domain, which is a long-standing and challenging issue in TL. 
+Negative transfer (NT) represents that introducing source domain data/knowledge decreases the learning performance in the target domain, which is a long-standing and challenging issue in transfer learning. 
 
-This repository contains codes of negative transfer (NT) detection experiments with over 20 representative approaches on three NT-specific datasets.
+This repository contains codes of NT detection experiments with over 20 representative approaches on three NT-specific datasets.
 
 
 
