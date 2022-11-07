@@ -10,7 +10,7 @@ import torch.nn as nn
 import os.path as osp
 import torch.optim as optim
 import utils.network as network
-from utils.loss import CELabelSmooth, Entropy, ReverseLayerF
+from utils.loss import CELabelSmooth, ReverseLayerF
 from utils.utils import data_load_img, cal_acc_img, op_copy, lr_scheduler
 
 

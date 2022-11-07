@@ -11,9 +11,10 @@ import torch.nn.functional as F
 from utils import network, loss, utils
 from utils.dataloader import read_seed_src_tar
 from utils.utils import fix_random_seed, data_load_noimg_ssda
-from utils.loss import mix_rbf_mmd2, PerturbationGenerator_two, KLDivLossWithLogits, Entropy, entropy
-from utils.utils import op_copy, lr_scheduler
+from utils.loss import mix_rbf_mmd2, PerturbationGenerator_two, KLDivLossWithLogits
+from utils.utils import lr_scheduler_full
 import warnings
+
 warnings.filterwarnings('ignore')
 
 
@@ -24,22 +25,9 @@ def train_target(args):
     netF, netC = network.backbone_net(args, args.bottleneck)
     netF.load_state_dict(tr.load(args.mdl_init_dir + 'netF.pt'))
     netC.load_state_dict(tr.load(args.mdl_init_dir + 'netC.pt'))
+    base_network = nn.Sequential(netF, netC)
+    optimizer = optim.SGD(base_network.parameters(), lr=args.lr)
 
-    param_group = []
-    for k, v in netF.named_parameters():
-        if args.lr_decay1 > 0:
-            param_group += [{'params': v, 'lr': args.lr * args.lr_decay1}]
-        else:
-            v.requires_grad = False
-    for k, v in netC.named_parameters():
-        if args.lr_decay2 > 0:
-            param_group += [{'params': v, 'lr': args.lr * args.lr_decay2}]
-        else:
-            v.requires_grad = False
-
-    optimizer = optim.SGD(param_group)
-    optimizer = op_copy(optimizer)
-    
     max_iter = args.max_epoch * len(dset_loaders["source"])
     interval_iter = max_iter // 10
     args.max_iter = max_iter
@@ -71,47 +59,47 @@ def train_target(args):
             continue
 
         iter_num += 1
-        lr_scheduler(optimizer, iter_num=iter_num, max_iter=max_iter)
+        lr_scheduler_full(optimizer, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
 
         criterion_supervision = nn.CrossEntropyLoss().cuda()
         criterion_reduce = nn.CrossEntropyLoss(reduce=False).cuda()
         criterion_consistency = KLDivLossWithLogits(reduction='mean').cuda()
-        
+
         inputs_source, labels_source = inputs_source.cuda(), labels_source.cuda()
         inputs_target_tr, labels_target_tr = inputs_target_tr.cuda(), labels_target_tr.cuda()
         inputs_target = inputs_target.cuda()
-        
+
         input_data_l = tr.cat((inputs_source, inputs_target_tr), 0)
         input_label_l = tr.cat((labels_source, labels_target_tr), 0)
         input_data_u = inputs_target
-        
+
         latent_output_l = F.normalize(netF(input_data_l))
         latent_output_u = F.normalize(netF(input_data_u))
         _, output_l = netC(latent_output_l)
         _, output_u = netC(latent_output_u)
         args.temp = 0.05
-        output_l, output_u = output_l / args.temp,  output_u / args.temp
-        
+        output_l, output_u = output_l / args.temp, output_u / args.temp
+
         # supervision loss:
         loss_supervision = criterion_supervision(output_l, input_label_l)
-        
+
         # attraction loss:
         sigma = [1, 2, 5, 10]
         loss_attraction = 10 * mix_rbf_mmd2(latent_output_l, latent_output_u, sigma)
-        
+
         # exploration loss:
         thr = 0.5
         pred = output_u.data.max(1)[1].detach()
         ent = - tr.sum(F.softmax(output_u, 1) * (tr.log(F.softmax(output_u, 1) + 1e-5)), 1)
         mask_reliable = (ent < thr).float().detach()
         loss_exploration = (mask_reliable * criterion_reduce(output_u, pred)).sum(0) / (1e-5 + mask_reliable.sum())
-        
+
         # first optimization process:
         loss_1 = loss_supervision + loss_attraction + loss_exploration
         optimizer.zero_grad()
         loss_1.backward(retain_graph=False)
         optimizer.step()
-        
+
         # perturbation loss:
         bs = labels_source.size(0)
         input_data_t = tr.cat((inputs_target_tr, inputs_target), 0)
@@ -121,7 +109,7 @@ def train_target(args):
         perturb_features = netF(perturb_inputs)
         perturb_logits = F.normalize(perturb_features)
         loss_perturbation = criterion_consistency(perturb_logits, clean_vat_logits)
-        
+
         # second optimization process:
         optimizer.zero_grad()
         loss_2 = loss_perturbation * 10
@@ -147,7 +135,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 
@@ -169,7 +156,7 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = '6'
     args.data_env = 'gpu'  # 'local'
-    args.seed = 2022
+    args.seed = 2022  # 2021~2023 repeat three times
     fix_random_seed(args.seed)
     tr.backends.cudnn.deterministic = True
 
@@ -193,4 +180,3 @@ if __name__ == '__main__':
 
     acc_sub_str = str(np.round(acc_all, 3).tolist())
     acc_mean_str = str(np.round(np.mean(acc_all), 3).tolist())
-

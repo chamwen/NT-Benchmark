@@ -43,4 +43,3 @@ for s in range(1, num_domain):  # source
 print('\nmean acc', np.round(np.mean(acc_all), 2))
 print(domain_list)
 print(np.round(acc_all, 2).tolist())
-

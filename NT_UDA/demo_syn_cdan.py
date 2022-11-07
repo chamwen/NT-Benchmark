@@ -30,7 +30,7 @@ def train_target(args):
     random_layer = RandomLayer([args.bottleneck, args.class_num], args.bottleneck)
     random_layer.cuda()
 
-    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr * 0.1)
+    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr)
     optimizer_c = optim.SGD(netC.parameters(), lr=args.lr)
     optimizer_d = optim.SGD(ad_net.parameters(), lr=args.lr)
 
@@ -57,7 +57,7 @@ def train_target(args):
             continue
 
         iter_num += 1
-        lr_scheduler_full(optimizer_f, init_lr=args.lr * 0.1, iter_num=iter_num, max_iter=args.max_iter)
+        lr_scheduler_full(optimizer_f, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
         lr_scheduler_full(optimizer_c, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
         lr_scheduler_full(optimizer_d, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
 

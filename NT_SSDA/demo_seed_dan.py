@@ -7,7 +7,7 @@ import os
 import torch as tr
 import torch.nn as nn
 import torch.optim as optim
-from utils import network, loss, utils
+from utils import network, utils
 from utils.LogRecord import LogRecord
 from utils.dataloader import read_seed_src_tar
 from utils.utils import lr_scheduler_full, fix_random_seed, data_load_noimg_ssda
@@ -22,9 +22,7 @@ def train_target(args):
     netF.load_state_dict(tr.load(args.mdl_init_dir + 'netF.pt'))
     netC.load_state_dict(tr.load(args.mdl_init_dir + 'netC.pt'))
     base_network = nn.Sequential(netF, netC)
-
-    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr * 0.1)
-    optimizer_c = optim.SGD(netC.parameters(), lr=args.lr)
+    optimizer = optim.SGD(base_network.parameters(), lr=args.lr)
 
     max_iter = args.max_epoch * len(dset_loaders["source"])
     interval_iter = max_iter // 10
@@ -55,8 +53,7 @@ def train_target(args):
             continue
 
         iter_num += 1
-        lr_scheduler_full(optimizer_f, init_lr=args.lr * 0.1, iter_num=iter_num, max_iter=args.max_iter)
-        lr_scheduler_full(optimizer_c, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
+        lr_scheduler_full(optimizer, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
 
         inputs_source, labels_source = inputs_source.cuda(), labels_source.cuda()
         inputs_target = inputs_target.cuda()
@@ -83,11 +80,9 @@ def train_target(args):
         discrepancy_loss = mkmmd_loss(fea_comb, feas_target)
         total_loss = classifier_loss + discrepancy_loss * args.trade_off
 
-        optimizer_f.zero_grad()
-        optimizer_c.zero_grad()
+        optimizer.zero_grad()
         total_loss.backward()
-        optimizer_f.step()
-        optimizer_c.step()
+        optimizer.step()
 
         if iter_num % interval_iter == 0 or iter_num == max_iter:
             base_network.eval()
@@ -107,7 +102,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 

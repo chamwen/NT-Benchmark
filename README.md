@@ -18,8 +18,6 @@ There are three NT-specific datasets with large domain shift, i.e., on one synth
 </div>
 
 
-
-
 ## Running the code
 
 The code is mainly based on Python 3.8 and PyTorch 1.8. 
@@ -67,3 +65,23 @@ For **semi-supervised TL** on DomainNet and SEED datasets:
 <div align="center">
     <img src="presentation/nt-ssda.png", width="800">
 </div>
+
+
+
+## Citation
+
+This code is corresponding to our IEEE/CAA JAS 2022 paper below:
+
+```
+@Article{wenz2022nt,
+  title={A Survey on Negative Transfer},
+  author={Zhang, Wen and Deng, Lingfei and Zhang, Lei and Wu, Dongrui},
+  journal={IEEE/CAA Journal of Automatica Sinica},
+  year={2022},
+  volume={9},
+  number={JAS-2022-0331},
+  pages={1--25}
+}
+```
+
+Please cite our paper if you like or use our work for your research, thank you!

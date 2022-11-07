@@ -2,12 +2,12 @@
 # A Survey on Negative Transfer
 # https://github.com/chamwen/NT-Benchmark
 import argparse
-import os, sys
+import os
 import numpy as np
 import torch as tr
 import torch.nn as nn
 import torch.optim as optim
-import random, pdb, math, copy
+import random
 import utils.network as network
 from torch.utils.data import DataLoader
 from utils.network import AdversarialNetwork, calc_coeff

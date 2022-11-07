@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from utils import network, loss, utils
 from utils.dataloader import read_seed_src_tar
-from utils.utils import lr_scheduler, fix_random_seed, data_load_noimg_ssda, op_copy
+from utils.utils import lr_scheduler_full, fix_random_seed, data_load_noimg_ssda
 from utils.loss import entropy
 
 
@@ -20,21 +20,8 @@ def train_target(args):
     netF, netC = network.backbone_net(args, args.bottleneck)
     netF.load_state_dict(tr.load(args.mdl_init_dir + 'netF.pt'))
     netC.load_state_dict(tr.load(args.mdl_init_dir + 'netC.pt'))
-
-    param_group = []
-    for k, v in netF.named_parameters():
-        if args.lr_decay1 > 0:
-            param_group += [{'params': v, 'lr': args.lr * args.lr_decay1}]
-        else:
-            v.requires_grad = False
-    for k, v in netC.named_parameters():
-        if args.lr_decay2 > 0:
-            param_group += [{'params': v, 'lr': args.lr * args.lr_decay2}]
-        else:
-            v.requires_grad = False
-
-    optimizer = optim.SGD(param_group)
-    optimizer = op_copy(optimizer)
+    base_network = nn.Sequential(netF, netC)
+    optimizer = optim.SGD(base_network.parameters(), lr=args.lr)
 
     max_iter = args.max_epoch * len(dset_loaders["source"])
     interval_iter = max_iter // 10
@@ -67,7 +54,7 @@ def train_target(args):
             continue
 
         iter_num += 1
-        lr_scheduler(optimizer, iter_num=iter_num, max_iter=max_iter)
+        lr_scheduler_full(optimizer, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
 
         inputs_source, labels_source = inputs_source.cuda(), labels_source.cuda()
         inputs_target_tr, labels_target_tr = inputs_target_tr.cuda(), labels_target_tr.cuda()
@@ -107,7 +94,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 
@@ -129,7 +115,7 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = '3'
     args.data_env = 'gpu'  # 'local'
-    args.seed = 2022
+    args.seed = 2022  # 2021~2023 repeat three times
     fix_random_seed(args.seed)
     tr.backends.cudnn.deterministic = True
 

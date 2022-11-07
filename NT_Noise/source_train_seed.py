@@ -4,6 +4,7 @@
 import numpy as np
 import argparse
 import torch as tr
+import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as Data
 import os.path as osp
@@ -11,7 +12,7 @@ import os
 from utils import network, loss, utils
 from utils.loss import CELabelSmooth
 from utils.dataloader import read_seed_single, obtain_train_val_source
-from utils.utils import create_folder, lr_scheduler, fix_random_seed, op_copy, add_label_noise_noimg
+from utils.utils import create_folder, lr_scheduler_full, fix_random_seed, add_label_noise_noimg
 
 
 def data_load(X, y, args):
@@ -40,15 +41,8 @@ def train_source(args):  # within validation
     netF, netC = network.backbone_net(args, args.bottleneck)
     netF.load_state_dict(tr.load(args.mdl_init_dir + 'netF.pt'))
     netC.load_state_dict(tr.load(args.mdl_init_dir + 'netC.pt'))
-
-    param_group = []
-    learning_rate = args.lr
-    for k, v in netF.named_parameters():
-        param_group += [{'params': v, 'lr': learning_rate * 0.1}]
-    for k, v in netC.named_parameters():
-        param_group += [{'params': v, 'lr': learning_rate}]
-    optimizer = optim.SGD(param_group)
-    optimizer = op_copy(optimizer)
+    base_network = nn.Sequential(netF, netC)
+    optimizer = optim.SGD(base_network.parameters(), lr=args.lr)
 
     acc_init = 0
     max_iter = args.max_epoch * len(dset_loaders["source_tr"])  # source_tr：80个
@@ -70,7 +64,8 @@ def train_source(args):  # within validation
             continue
 
         iter_num += 1
-        lr_scheduler(optimizer, iter_num=iter_num, max_iter=max_iter)
+        lr_scheduler_full(optimizer, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
+
         inputs_source, labels_source = inputs_source.cuda(), labels_source.cuda()
 
         _, outputs_source = netC(netF(inputs_source))
@@ -108,7 +103,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 
@@ -127,7 +121,7 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = '4'
     args.data_env = 'gpu'  # 'local'
-    args.seed = 2022
+    args.seed = 2021
     fix_random_seed(args.seed)
     tr.backends.cudnn.deterministic = True
 

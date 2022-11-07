@@ -180,7 +180,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 
@@ -200,7 +199,7 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = '5'
     args.data_env = 'gpu'  # 'local'
-    args.seed = 2022
+    args.seed = 2022  # 2021~2023 repeat three times
     fix_random_seed(args.seed)
     tr.backends.cudnn.deterministic = True
 

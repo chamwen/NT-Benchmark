@@ -12,7 +12,7 @@ from utils import network, loss, utils
 from utils.LogRecord import LogRecord
 from utils.dataloader import read_seed_src_tar
 from utils.utils import lr_scheduler_full, fix_random_seed, data_load_noimg
-from utils.loss import CELabelSmooth, Entropy, ReverseLayerF
+from utils.loss import CELabelSmooth, ReverseLayerF
 
 
 def train_target(args):
@@ -29,7 +29,7 @@ def train_target(args):
     ad_net = network.feat_classifier(type=args.layer, class_num=2, bottleneck_dim=args.bottleneck).cuda()
     ad_net.load_state_dict(tr.load(args.mdl_init_dir + 'netD_clf.pt'))
 
-    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr * 0.1)
+    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr)
     optimizer_c = optim.SGD(netC.parameters(), lr=args.lr)
     optimizer_d = optim.SGD(ad_net.parameters(), lr=args.lr)
 
@@ -56,7 +56,7 @@ def train_target(args):
             continue
 
         iter_num += 1
-        lr_scheduler_full(optimizer_f, init_lr=args.lr * 0.1, iter_num=iter_num, max_iter=args.max_iter)
+        lr_scheduler_full(optimizer_f, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
         lr_scheduler_full(optimizer_c, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
         lr_scheduler_full(optimizer_d, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
 
@@ -109,7 +109,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 

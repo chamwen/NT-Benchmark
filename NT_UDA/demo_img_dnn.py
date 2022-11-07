@@ -2,14 +2,14 @@
 # A Survey on Negative Transfer
 # https://github.com/chamwen/NT-Benchmark
 import argparse
-import os, sys
+import os
 import os.path as osp
 import numpy as np
 import torch as tr
 import torch.optim as optim
-import random, pdb, math, copy
+import random
 import utils.network as network
-from utils.loss import CELabelSmooth, Entropy
+from utils.loss import CELabelSmooth
 from utils.utils import data_load_img, cal_acc_img, save_fea_base, op_copy, lr_scheduler
 
 

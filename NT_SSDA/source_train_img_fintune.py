@@ -2,7 +2,7 @@
 # A Survey on Negative Transfer
 # https://github.com/chamwen/NT-Benchmark
 import argparse
-import os, sys
+import os
 import os.path as osp
 import numpy as np
 import torch as tr
@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 import utils.network as network
 from utils.data_list import ImageList
 from utils.LogRecord import LogRecord
-from utils.loss import CELabelSmooth, Entropy
+from utils.loss import CELabelSmooth
 from utils.utils import cal_acc_img, op_copy, lr_scheduler, add_label_noise_img, \
     image_train, image_test, fix_random_seed, create_folder
 

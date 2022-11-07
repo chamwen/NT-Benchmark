@@ -2,15 +2,15 @@
 # A Survey on Negative Transfer
 # https://github.com/chamwen/NT-Benchmark
 import argparse
-import os, sys
+import os
 import numpy as np
 import torch as tr
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import utils.network as network
-import random, pdb, math, copy
-from utils.loss import mix_rbf_mmd2, PerturbationGenerator, KLDivLossWithLogits, Entropy
+import random
+from utils.loss import mix_rbf_mmd2, PerturbationGenerator, KLDivLossWithLogits
 from utils.utils import data_load_img_ssda, op_copy, lr_scheduler, cal_acc_img
 import warnings
 
@@ -102,7 +102,7 @@ def train_target(args):
         latent_output_u = F.normalize(netB(netF(input_data_u)))
         _, output_l = netC(latent_output_l)
         _, output_u = netC(latent_output_u)
-        output_l, output_u = output_l / args.temp,  output_u / args.temp
+        output_l, output_u = output_l / args.temp, output_u / args.temp
 
         # supervision loss:
         loss_supervision = criterion_supervision(output_l, input_label_l)
@@ -236,4 +236,3 @@ if __name__ == "__main__":
         print('\n\nfinish one repeat')
         print('All acc: ', np.round(acc_all, 2))
         print('Avg acc: ', np.round(np.mean(acc_all), 2))
-

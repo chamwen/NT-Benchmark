@@ -7,7 +7,7 @@ import os
 import torch as tr
 import torch.nn as nn
 import torch.optim as optim
-from utils import network, loss, utils
+from utils import network, utils
 from utils.LogRecord import LogRecord
 from utils.dataloader import read_seed_src_tar
 from utils.utils import lr_scheduler_full, fix_random_seed, data_load_noimg_ssda
@@ -31,7 +31,7 @@ def train_target(args):
     random_layer = RandomLayer([args.bottleneck, args.class_num], args.bottleneck)
     random_layer.cuda()
 
-    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr * 0.1)
+    optimizer_f = optim.SGD(netF.parameters(), lr=args.lr)
     optimizer_c = optim.SGD(netC.parameters(), lr=args.lr)
     optimizer_d = optim.SGD(ad_net.parameters(), lr=args.lr)
 
@@ -64,7 +64,7 @@ def train_target(args):
             continue
 
         iter_num += 1
-        lr_scheduler_full(optimizer_f, init_lr=args.lr * 0.1, iter_num=iter_num, max_iter=args.max_iter)
+        lr_scheduler_full(optimizer_f, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
         lr_scheduler_full(optimizer_c, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
         lr_scheduler_full(optimizer_d, init_lr=args.lr, iter_num=iter_num, max_iter=args.max_iter)
 
@@ -122,7 +122,6 @@ if __name__ == '__main__':
     data_name = 'SEED'
     if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
     focus_domain_idx = [0, 1, 2]
-    # focus_domain_idx = np.arange(15)
     domain_list = ['S' + str(i) for i in focus_domain_idx]
     num_domain = len(domain_list)
 

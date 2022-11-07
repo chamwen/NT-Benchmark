@@ -37,7 +37,6 @@ def dataload(args):
 data_name = 'SEED'
 if data_name == 'SEED': chn, class_num, trial_num = 62, 3, 3394
 focus_domain_idx = [0, 1, 2]
-# focus_domain_idx = np.arange(15)
 domain_list = ['S' + str(i) for i in focus_domain_idx]
 num_domain = len(domain_list)
 
