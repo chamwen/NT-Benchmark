@@ -73,14 +73,14 @@ For **semi-supervised TL** on DomainNet and SEED datasets:
 This code is corresponding to our IEEE/CAA JAS 2022 paper below:
 
 ```
-@Article{wenz2022nt,
-  title={A Survey on Negative Transfer},
-  author={Zhang, Wen and Deng, Lingfei and Zhang, Lei and Wu, Dongrui},
-  journal={IEEE/CAA Journal of Automatica Sinica},
-  year={2022},
-  volume={9},
-  number={JAS-2022-0331},
-  pages={1--25}
+@article{zhang2022ntl,
+  title = {A Survey on Negative Transfer},
+  author = {Zhang, Wen and Deng, Lingfei and Zhang, Lei and Wu, Dongrui},
+  journal = {IEEE/CAA Journal of Automatica Sinica},
+  year = {2023},
+  volume = {10},
+  number = {2},
+  pages = {1--25}	
 }
 ```
 
