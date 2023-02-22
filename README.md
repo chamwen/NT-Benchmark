@@ -70,7 +70,7 @@ For **semi-supervised TL** on DomainNet and SEED datasets:
 
 ## Citation
 
-This code is corresponding to our IEEE/CAA JAS 2022 paper below:
+This code is corresponding to our IEEE/CAA JAS 2023 paper below:
 
 ```
 @article{zhang2022ntl,
