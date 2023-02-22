@@ -80,7 +80,7 @@ This code is corresponding to our IEEE/CAA JAS 2022 paper below:
   year = {2023},
   volume = {10},
   number = {2},
-  pages = {1--25}	
+  pages = {305--329}	
 }
 ```
 
